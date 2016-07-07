@@ -9,6 +9,7 @@ ENV listen *
 #Virtual hosting
 RUN yum install -y httpd
 RUN yum install -y --skip-broken php php-devel php-mysqlnd php-common php-pdo php-mbstring php-xml
+RUN yum install -y make gcc libtool re2c file git
 RUN mkdir -p $dir${cname}_$servn
 RUN chown -R ${user}:${user}  $dir${cname}_$servn
 RUN chmod -R 755  $dir${cname}_$servn
@@ -16,7 +17,9 @@ RUN mkdir /var/log/${cname}_$servn
 RUN mkdir /etc/httpd/sites-available
 RUN mkdir /etc/httpd/sites-enabled
 RUN mkdir -p ${dir}${cname}_${servn}/logs
-RUN mkdir -p ${dir}${cname}_${servn}/public_html
+#RUN mkdir -p ${dir}${cname}_${servn}/public_html
+
+RUN git clone https://github.com/jijeesh/phalcon-helloWorld.git ${dir}${cname}_${servn}/phalcon
 
 RUN printf '# * Hardening Apache \n\
 ServerTokens Prod \n\
@@ -34,10 +37,10 @@ RUN printf "#### $cname $servn \n\
 <VirtualHost ${listen}:80> \n\
 ServerName ${servn} \n\
 ServerAlias ${alias} \n\
-DocumentRoot ${dir}${cname}_${servn}/public_html \n\
+DocumentRoot ${dir}${cname}_${servn}/phalcon/public \n\
 ErrorLog ${dir}${cname}_${servn}/logs/error.log \n\
 CustomLog ${dir}${cname}_${servn}/logs/requests.log combined \n\
-<Directory ${dir}${cname}_${servn}/public_html> \n\
+<Directory ${dir}${cname}_${servn}/phalcon/public> \n\
 Options -Indexes \n\
 Options -ExecCGI -Includes \n\
 LimitRequestBody 204800 \n\
@@ -89,7 +92,6 @@ RUN sed -i \
 #############################################################
 #### php5 phalcon configuration
 
-RUN yum install -y make gcc libtool re2c file git
 RUN git clone --depth=1 https://github.com/phalcon/cphalcon.git && \
     cd cphalcon/build && \
     ./install
